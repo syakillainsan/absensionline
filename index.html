@@ -1,463 +1,376 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
-import axios from 'axios';
-
-// --- Akun Dummy untuk Login ---
-const dummyUsers = {
-  "admin": { password: "admin123", role: "admin", nama: "Admin Sekolah" },
-  // Daftar Siswa Baru disesuaikan dengan daftar absen
-  "aldebaran": { password: "password123", role: "siswa", nama: "Aldebaran Adam Syahputra", kelas: "XII-D" },
-  "anzilah": { password: "password123", role: "siswa", nama: "Anzilah Nurcahaya", kelas: "XII-D" },
-  "aulia": { password: "password123", role: "siswa", nama: "Aulia Danish", kelas: "XII-D" },
-  "chairil": { password: "password123", role: "siswa", nama: "Chairil Ahmad Fathir", kelas: "XII-D" },
-  "daiva": { password: "password123", role: "siswa", nama: "Daiva Bhagja Wangsapriyatman", kelas: "XII-D" },
-  "dellaluna": { password: "password123", role: "siswa", nama: "Dellaluna Nur Agustina", kelas: "XII-D" },
-  "denian": { password: "password123", role: "siswa", nama: "Denian Prasetya", kelas: "XII-D" },
-  "fadhillah": { password: "password123", role: "siswa", nama: "Fadhillah Nursyifa", kelas: "XII-D" },
-  "ghaisan": { password: "password123", role: "siswa", nama: "Ghaisan Rafani", kelas: "XII-D" },
-  "hasna": { password: "password123", role: "siswa", nama: "Hasna Fauziah Aqila", kelas: "XII-D" },
-  "heni": { password: "password123", role: "siswa", nama: "Heni Ramadhani", kelas: "XII-D" },
-  "iyan": { password: "password123", role: "siswa", nama: "Iyan Apriansa", kelas: "XII-D" },
-  "keihsa": { password: "password123", role: "siswa", nama: "Keihsa Anindya Danastri H", kelas: "XII-D" },
-  "kintan": { password: "password123", role: "siswa", nama: "Kintan Putri Haryono", kelas: "XII-D" },
-  "fajri": { password: "password123", role: "siswa", nama: "Fajri Bakkah", kelas: "XII-D" },
-  "farhan": { password: "password123", role: "siswa", nama: "Farhan", kelas: "XII-D" },
-  "nabil": { password: "password123", role: "siswa", nama: "Nabil Fadlurrohman", kelas: "XII-D" },
-  "ridhan": { password: "password123", role: "siswa", nama: "Ridhan Fajari", kelas: "XII-D" },
-  "rizqy": { password: "password123", role: "siswa", nama: "Rizqy Irza Saputra", kelas: "XII-D" },
-  "nadia": { password: "password123", role: "siswa", nama: "Nadia Aprianca Putri", kelas: "XII-D" },
-  "naisya": { password: "password123", role: "siswa", nama: "Naisya Aufiya Indri", kelas: "XII-D" },
-  "nasya": { password: "password123", role: "siswa", nama: "Nasya Tri Febriyani", kelas: "XII-D" },
-  "naya": { password: "password123", role: "siswa", nama: "Naya Nardiana", kelas: "XII-D" },
-  "nur": { password: "password123", role: "siswa", nama: "Nur Maya Aini", kelas: "XII-D" },
-  "puspita": { password: "password123", role: "siswa", nama: "Puspita Widia Kusumaningsih", kelas: "XII-D" },
-  "puteri": { password: "password123", role: "siswa", nama: "Puteri Rosmayanti", kelas: "XII-D" },
-  "rafa": { password: "password123", role: "siswa", nama: "Rafa Yanwardi Azhar", kelas: "XII-D" },
-  "raka": { password: "password123", role: "siswa", nama: "Raka Alif Al Aziz", kelas: "XII-D" },
-  "resti": { password: "password123", role: "siswa", nama: "Resti Julianti", kelas: "XII-D" },
-  "siti": { password: "password123", role: "siswa", nama: "Siti Nurmalia Ramadhan", kelas: "XII-D" },
-  "sultan": { password: "password123", role: "siswa", nama: "Sultan Fardhan Anggestu", kelas: "XII-D" },
-  "sumayyah": { password: "password123", role: "siswa", nama: "Sumayyah Dema Nazihah", kelas: "XII-D" },
-  "syafira": { password: "password123", role: "siswa", nama: "Syafira Ramadhani", kelas: "XII-D" },
-  "syakilla": { password: "password123", role: "siswa", nama: "Syakilla Insan Sabria", kelas: "XII-D" },
-  "syifa": { password: "password123", role: "siswa", nama: "Syifa Amelia Dalimunthe", kelas: "XII-D" },
-  "zahratunnisa": { password: "password123", role: "siswa", nama: "Zahratunnisa", kelas: "XII-D" },
-};
-
-
-// --- Konfigurasi Awal ---
-const AuthContext = createContext(null);
-
-// --- Auth Provider ---
-function AuthProvider({ children }) {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(false);
-
-    const login = async (username, password) => {
-        const potentialUser = dummyUsers[username.toLowerCase()];
-
-        if (potentialUser && potentialUser.password === password) {
-            // Jika login berhasil, set state user
-            setUser({
-                id: potentialUser.id || username,
-                nama: potentialUser.nama,
-                role: potentialUser.role,
-                kelas: potentialUser.kelas || null,
-            });
-        } else {
-            // Jika gagal, lempar error
-            throw new Error("Username atau password salah.");
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Absensi Sekolah</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Style untuk wallpaper halaman login */
+        .login-wallpaper {
+            background-color: #f3f4f6;
+            background-image: radial-gradient(#a3a3a3 0.5px, transparent 0.5px), radial-gradient(#a3a3a3 0.5px, #f3f4f6 0.5px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
         }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen font-sans">
+
+    <div id="app-container" class="w-full">
+        <!-- HEADER -->
+        <header id="app-header" class="bg-white shadow-md">
+            <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+                       <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 16c1.255 0 2.443-.29 3.5-.804V4.804zM14.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 0114.5 16c1.255 0 2.443-.29 3.5-.804v-10A7.968 7.968 0 0014.5 4z" />
+                    </svg>
+                    <h1 class="text-xl font-bold text-blue-600">Sistem Absensi Sekolah</h1>
+                </div>
+                <div id="user-info">
+                    <p class="text-gray-600">Silakan login</p>
+                </div>
+            </nav>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <main class="container mx-auto px-6 py-8">
+            <!-- Notification Placeholder -->
+            <div id="notification" class="hidden"></div>
+
+            <!-- LOGIN PAGE -->
+            <div id="login-page">
+                <div class="max-w-md mx-auto bg-white/90 backdrop-blur-sm p-8 rounded-lg shadow-xl">
+                    <div class="flex justify-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
+                           <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 16c1.255 0 2.443-.29 3.5-.804V4.804zM14.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 0114.5 16c1.255 0 2.443-.29 3.5-.804v-10A7.968 7.968 0 0014.5 4z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-6 text-center">Login</h2>
+                    <form id="login-form">
+                        <div class="mb-4">
+                            <label class="block text-gray-700">Username</label>
+                            <input type="text" name="username" placeholder="Username siswa (cth: aulia, fajri)" class="w-full px-3 py-2 border rounded" required />
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-gray-700">Password</label>
+                            <input type="password" name="password" placeholder="Password untuk siswa: password123" class="w-full px-3 py-2 border rounded" required />
+                        </div>
+                        <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                            Login
+                        </button>
+                    </form>
+                    <div class="mt-4 p-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700">
+                        <p class="font-bold">Info Akun:</p>
+                        <ul class="list-disc list-inside">
+                            <li><b>Admin:</b> admin / admin123</li>
+                            <li><b>Siswa:</b> Username (nama depan) / password123</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DASHBOARD CONTAINER (HIDDEN INITIALLY) -->
+            <div id="dashboard" class="hidden">
+                <!-- SISWA DASHBOARD -->
+                <div id="siswa-dashboard" class="hidden">
+                    <h2 class="text-2xl font-bold mb-4">Form Absensi Siswa</h2>
+                    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                         <h3 class="text-xl font-semibold border-b pb-2 mb-4">Data Siswa</h3>
+                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Nama Lengkap</label>
+                                <p id="siswa-nama" class="text-lg font-semibold"></p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Kelas</label>
+                                <p id="siswa-kelas" class="text-lg font-semibold"></p>
+                            </div>
+                        </div>
+                         <div>
+                            <label class="block text-sm font-medium text-gray-700">Foto Bukti (untuk Izin/Sakit)</label>
+                            <input id="foto-input" type="file" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                        <h3 class="text-xl font-semibold mb-4">Pilih Kehadiran</h3>
+                        <div class="flex space-x-4">
+                            <button data-status="Hadir" class="absen-btn bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors">Hadir</button>
+                            <button data-status="Izin" class="absen-btn bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition-colors">Izin</button>
+                            <button data-status="Sakit" class="absen-btn bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition-colors">Sakit</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ADMIN DASHBOARD -->
+                <div id="admin-dashboard" class="hidden">
+                     <h2 class="text-2xl font-bold mb-6">Dashboard Admin</h2>
+                     <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-semibold mb-4 border-b pb-2">Laporan Riwayat Absensi</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-sm">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th class="p-2 text-left">Jam</th>
+                                        <th class="p-2 text-left">Tanggal</th>
+                                        <th class="p-2 text-left">Nama</th>
+                                        <th class="p-2 text-left">Kelas</th>
+                                        <th class="p-2 text-left">Status</th>
+                                        <th class="p-2 text-center">Foto Bukti</th>
+                                        <th class="p-2 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-table-body">
+                                    <!-- Data akan diisi oleh JavaScript -->
+                                </tbody>
+                            </table>
+                            <p id="no-data-message" class="text-gray-500 text-center py-4 hidden">Belum ada data absensi yang masuk.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL (HIDDEN INITIALLY) -->
+    <div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 hidden">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+            <h2 class="text-2xl font-bold mb-6">Edit Absensi</h2>
+            <form id="edit-form">
+                <input type="hidden" name="id" />
+                <div class="mb-4">
+                    <label class="block text-gray-700">Nama Siswa</label>
+                    <input type="text" name="nama" class="w-full px-3 py-2 border rounded" required />
+                </div>
+                 <div class="mb-4">
+                    <label class="block text-gray-700">Kelas</label>
+                    <input type="text" name="kelas" class="w-full px-3 py-2 border rounded" required />
+                </div>
+                 <div class="mb-4">
+                    <label class="block text-gray-700">Tanggal</label>
+                    <input type="date" name="tanggal" class="w-full px-3 py-2 border rounded" required />
+                </div>
+                <div class="mb-6">
+                    <label class="block text-gray-700">Status</label>
+                    <select name="status" class="w-full px-3 py-2 border rounded">
+                        <option value="Hadir">Hadir</option>
+                        <option value="Izin">Izin</option>
+                        <option value="Sakit">Sakit</option>
+                        <option value="Alfa">Alfa</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-4">
+                    <button type="button" id="cancel-edit-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
+                        Batal
+                    </button>
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                        Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- DATA & STATE MANAGEMENT ---
+    let currentUser = null;
+    const dummyUsers = {
+        "admin": { password: "admin123", role: "admin", nama: "Admin Sekolah" },
+        "aldebaran": { password: "password123", role: "siswa", nama: "Aldebaran Adam Syahputra", kelas: "XII-D" }, "anzilah": { password: "password123", role: "siswa", nama: "Anzilah Nurcahaya", kelas: "XII-D" }, "aulia": { password: "password123", role: "siswa", nama: "Aulia Danish", kelas: "XII-D" }, "chairil": { password: "password123", role: "siswa", nama: "Chairil Ahmad Fathir", kelas: "XII-D" }, "daiva": { password: "password123", role: "siswa", nama: "Daiva Bhagja Wangsapriyatman", kelas: "XII-D" }, "dellaluna": { password: "password123", role: "siswa", nama: "Dellaluna Nur Agustina", kelas: "XII-D" }, "denian": { password: "password123", role: "siswa", nama: "Denian Prasetya", kelas: "XII-D" }, "fadhillah": { password: "password123", role: "siswa", nama: "Fadhillah Nursyifa", kelas: "XII-D" }, "ghaisan": { password: "password123", role: "siswa", nama: "Ghaisan Rafani", kelas: "XII-D" }, "hasna": { password: "password123", role: "siswa", nama: "Hasna Fauziah Aqila", kelas: "XII-D" }, "heni": { password: "password123", role: "siswa", nama: "Heni Ramadhani", kelas: "XII-D" }, "iyan": { password: "password123", role: "siswa", nama: "Iyan Apriansa", kelas: "XII-D" }, "keihsa": { password: "password123", role: "siswa", nama: "Keihsa Anindya Danastri H", kelas: "XII-D" }, "kintan": { password: "password123", role: "siswa", nama: "Kintan Putri Haryono", kelas: "XII-D" }, "fajri": { password: "password123", role: "siswa", nama: "Fajri Bakkah", kelas: "XII-D" }, "farhan": { password: "password123", role: "siswa", nama: "Farhan", kelas: "XII-D" }, "nabil": { password: "password123", role: "siswa", nama: "Nabil Fadlurrohman", kelas: "XII-D" }, "ridhan": { password: "password123", role: "siswa", nama: "Ridhan Fajari", kelas: "XII-D" }, "rizqy": { password: "password123", role: "siswa", nama: "Rizqy Irza Saputra", kelas: "XII-D" }, "nadia": { password: "password123", role: "siswa", nama: "Nadia Aprianca Putri", kelas: "XII-D" }, "naisya": { password: "password123", role: "siswa", nama: "Naisya Aufiya Indri", kelas: "XII-D" }, "nasya": { password: "password123", role: "siswa", nama: "Nasya Tri Febriyani", kelas: "XII-D" }, "naya": { password: "password123", role: "siswa", nama: "Naya Nardiana", kelas: "XII-D" }, "nur": { password: "password123", role: "siswa", nama: "Nur Maya Aini", kelas: "XII-D" }, "puspita": { password: "password123", role: "siswa", nama: "Puspita Widia Kusumaningsih", kelas: "XII-D" }, "puteri": { password: "password123", role: "siswa", nama: "Puteri Rosmayanti", kelas: "XII-D" }, "rafa": { password: "password123", role: "siswa", nama: "Rafa Yanwardi Azhar", kelas: "XII-D" }, "raka": { password: "password123", role: "siswa", nama: "Raka Alif Al Aziz", kelas: "XII-D" }, "resti": { password: "password123", role: "siswa", nama: "Resti Julianti", kelas: "XII-D" }, "siti": { password: "password123", role: "siswa", nama: "Siti Nurmalia Ramadhan", kelas: "XII-D" }, "sultan": { password: "password123", role: "siswa", nama: "Sultan Fardhan Anggestu", kelas: "XII-D" }, "sumayyah": { password: "password123", role: "siswa", nama: "Sumayyah Dema Nazihah", kelas: "XII-D" }, "syafira": { password: "password123", role: "siswa", nama: "Syafira Ramadhani", kelas: "XII-D" }, "syakilla": { password: "password123", role: "siswa", nama: "Syakilla Insan Sabria", kelas: "XII-D" }, "syifa": { password: "password123", role: "siswa", nama: "Syifa Amelia Dalimunthe", kelas: "XII-D" }, "zahratunnisa": { password: "password123", role: "siswa", nama: "Zahratunnisa", kelas: "XII-D" },
     };
-
-    const logout = () => {
-        setUser(null);
-    };
-
-    const value = { user, login, logout, loading };
-
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-}
-
-// --- Komponen Utama ---
-export default function App() {
-    return (
-        <>
-            {/* Style untuk wallpaper halaman login */}
-            <style>{`
-                .login-wallpaper {
-                    background-color: #f3f4f6;
-                    background-image: radial-gradient(#a3a3a3 0.5px, transparent 0.5px), radial-gradient(#a3a3a3 0.5px, #f3f4f6 0.5px);
-                    background-size: 20px 20px;
-                    background-position: 0 0, 10px 10px;
-                }
-            `}</style>
-            <AuthProvider>
-                <MainLayout />
-            </AuthProvider>
-        </>
-    );
-}
-
-// --- Layout ---
-function MainLayout() {
-    const { user, logout, loading } = useContext(AuthContext);
-    const [notification, setNotification] = useState({ message: '', type: '' });
-    // LIFT STATE UP: State data absensi dipindahkan ke sini agar tidak hilang saat ganti user
-    const [attendanceData, setAttendanceData] = useState([
+    let attendanceData = [
         { id: 1, jam: '07:05:12', tanggal: '2025-09-29', nama: 'Budi Hartono', kelas: 'X-A', status: 'Hadir', foto: null},
         { id: 2, jam: '08:15:30', tanggal: '2025-09-29', nama: 'Citra Lestari', kelas: 'X-B', status: 'Sakit', foto: 'https://placehold.co/600x400/orange/white?text=Surat+Sakit'},
-        { id: 3, jam: '07:30:00', tanggal: '2025-09-29', nama: 'Doni Saputra', kelas: 'X-A', status: 'Hadir', foto: null},
-        { id: 4, jam: '09:00:00', tanggal: '2025-09-29', nama: 'Eka Putri', kelas: 'X-C', status: 'Izin', foto: 'https://placehold.co/600x400/yellow/black?text=Surat+Izin'},
-    ]);
+    ];
 
+    // --- DOM ELEMENT SELECTORS ---
+    const body = document.body;
+    const loginPage = document.getElementById('login-page');
+    const dashboard = document.getElementById('dashboard');
+    const siswaDashboard = document.getElementById('siswa-dashboard');
+    const adminDashboard = document.getElementById('admin-dashboard');
+    const loginForm = document.getElementById('login-form');
+    const userInfo = document.getElementById('user-info');
+    const adminTableBody = document.getElementById('admin-table-body');
+    const noDataMessage = document.getElementById('no-data-message');
+    const notifElement = document.getElementById('notification');
+    const siswaNama = document.getElementById('siswa-nama');
+    const siswaKelas = document.getElementById('siswa-kelas');
+    const fotoInput = document.getElementById('foto-input');
+    const absenButtons = document.querySelectorAll('.absen-btn');
+    const editModal = document.getElementById('edit-modal');
+    const editForm = document.getElementById('edit-form');
+    const cancelEditBtn = document.getElementById('cancel-edit-btn');
+    
+
+    // --- FUNCTIONS ---
     const showNotif = (message, type = 'success') => {
-        setNotification({ message, type });
-        setTimeout(() => setNotification({ message: '', type: '' }), 4000);
+        const typeStyle = {
+          success: 'bg-green-500', error: 'bg-red-500', info: 'bg-blue-500'
+        }[type] || 'bg-gray-500';
+        notifElement.className = `p-4 rounded-md mb-4 text-white ${typeStyle}`;
+        notifElement.textContent = message;
+        notifElement.classList.remove('hidden');
+        setTimeout(() => notifElement.classList.add('hidden'), 4000);
     };
 
-    if (loading) {
-        return <div className="flex items-center justify-center h-screen">Loading...</div>;
-    }
+    const renderAdminTable = () => {
+        adminTableBody.innerHTML = ''; // Clear table
+        if (attendanceData.length === 0) {
+            noDataMessage.classList.remove('hidden');
+            return;
+        }
+        noDataMessage.classList.add('hidden');
 
-    // Terapkan wallpaper jika user belum login, jika sudah, gunakan background abu-abu biasa
-    const layoutClass = user 
-        ? "bg-gray-100 min-h-screen font-sans" 
-        : "login-wallpaper min-h-screen font-sans flex items-center justify-center";
+        attendanceData.forEach(item => {
+            const row = document.createElement('tr');
+            row.className = 'border-t hover:bg-gray-50';
+            
+            const fotoLink = item.foto 
+                ? `<a href="${item.foto}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Lihat Foto</a>` 
+                : '<span>-</span>';
 
-    return (
-        <div className={layoutClass}>
-            <div className="w-full">
-                <header className="bg-white shadow-md">
-                    <nav className="container mx-auto px-6 py-3 flex justify-between items-center">
-                        <div className="flex items-center gap-3">
-                            {/* <!-- Logo SVG Ditambahkan di sini --> */}
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-                               <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 16c1.255 0 2.443-.29 3.5-.804V4.804zM14.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 0114.5 16c1.255 0 2.443-.29 3.5-.804v-10A7.968 7.968 0 0014.5 4z" />
-                            </svg>
-                            <h1 className="text-xl font-bold text-blue-600">Sistem Absensi Sekolah</h1>
-                        </div>
-                        <div>
-                            {user ? (
-                                <>
-                                    <span className="mr-4 text-gray-700">Halo, {user.nama} ({user.role})</span>
-                                    <button onClick={logout} className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
-                                        Logout
-                                    </button>
-                                </>
-                            ) : (
-                                 <p className="text-gray-600">Silakan login</p>
-                            )}
-                        </div>
-                    </nav>
-                </header>
-                <main className="container mx-auto px-6 py-8">
-                    {notification.message && <Notification message={notification.message} type={notification.type} />}
-                    
-                    {!user ? (
-                        <LoginPage showNotif={showNotif} />
-                    ) : (
-                        <Dashboard 
-                            user={user} 
-                            showNotif={showNotif} 
-                            attendanceData={attendanceData}
-                            setAttendanceData={setAttendanceData}
-                        />
-                    )}
-                </main>
-            </div>
-        </div>
-    );
-}
+            row.innerHTML = `
+                <td class="p-2">${item.jam}</td>
+                <td class="p-2">${item.tanggal}</td>
+                <td class="p-2">${item.nama}</td>
+                <td class="p-2">${item.kelas}</td>
+                <td class="p-2">${item.status}</td>
+                <td class="p-2 text-center">${fotoLink}</td>
+                <td class="p-2 text-center">
+                    <button data-id="${item.id}" class="edit-btn bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 text-xs">Edit</button>
+                </td>
+            `;
+            adminTableBody.appendChild(row);
+        });
+    };
 
-// --- Halaman Login ---
-function LoginPage({ showNotif }) {
-    const { login } = useContext(AuthContext);
-    const [formData, setFormData] = useState({ username: '', password: '' });
+    const updateUI = () => {
+        renderAdminTable();
+        if (currentUser) {
+            // User is logged in
+            body.className = "bg-gray-100 min-h-screen font-sans";
+            loginPage.style.display = 'none';
+            dashboard.style.display = 'block';
+            
+            userInfo.innerHTML = `
+                <span class="mr-4 text-gray-700">Halo, ${currentUser.nama} (${currentUser.role})</span>
+                <button id="logout-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">Logout</button>
+            `;
+            document.getElementById('logout-btn').addEventListener('click', handleLogout);
 
-    const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+            if (currentUser.role === 'admin') {
+                adminDashboard.style.display = 'block';
+                siswaDashboard.style.display = 'none';
+            } else if (currentUser.role === 'siswa') {
+                adminDashboard.style.display = 'none';
+                siswaDashboard.style.display = 'block';
+                siswaNama.textContent = currentUser.nama;
+                siswaKelas.textContent = currentUser.kelas;
+            }
 
-    const handleSubmit = async (e) => {
+        } else {
+            // User is logged out
+            body.className = "login-wallpaper min-h-screen font-sans flex items-center justify-center";
+            loginPage.style.display = 'block';
+            dashboard.style.display = 'none';
+            userInfo.innerHTML = `<p class="text-gray-600">Silakan login</p>`;
+        }
+    };
+    
+    // --- EVENT HANDLERS ---
+    const handleLogin = (e) => {
         e.preventDefault();
-        try {
-            await login(formData.username, formData.password);
+        const username = e.target.username.value.toLowerCase();
+        const password = e.target.password.value;
+        const potentialUser = dummyUsers[username];
+
+        if (potentialUser && potentialUser.password === password) {
+            currentUser = { id: username, ...potentialUser };
             showNotif('Login berhasil!', 'success');
-        } catch (error) {
-            const message = error.message || 'Login gagal, coba lagi.';
-            showNotif(message, 'error');
+            loginForm.reset();
+            updateUI();
+        } else {
+            showNotif('Username atau password salah.', 'error');
         }
     };
 
-    return (
-        <div className="max-w-md mx-auto bg-white/90 backdrop-blur-sm p-8 rounded-lg shadow-xl">
-            <div className="flex justify-center mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-                   <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 16c1.255 0 2.443-.29 3.5-.804V4.804zM14.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 0114.5 16c1.255 0 2.443-.29 3.5-.804v-10A7.968 7.968 0 0014.5 4z" />
-                </svg>
-            </div>
-            <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
-            <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                    <label className="block text-gray-700">Username</label>
-                    <input type="text" name="username" placeholder="Username siswa (cth: aulia, fajri)" onChange={handleChange} className="w-full px-3 py-2 border rounded" required />
-                </div>
-                <div className="mb-6">
-                    <label className="block text-gray-700">Password</label>
-                    <input type="password" name="password" placeholder="Password untuk siswa: password123" onChange={handleChange} className="w-full px-3 py-2 border rounded" required />
-                </div>
-                <button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-                    Login
-                </button>
-            </form>
-            <div className="mt-4 p-4 bg-blue-100 border-l-4 border-blue-500 text-blue-700">
-                <p className="font-bold">Info Akun:</p>
-                <ul className="list-disc list-inside">
-                    <li><b>Admin:</b> admin / admin123</li>
-                    <li><b>Siswa:</b> Username (nama depan) / password123</li>
-                </ul>
-            </div>
-        </div>
-    );
-}
-
-// --- Dashboard Berdasarkan Role ---
-function Dashboard({ user, showNotif, attendanceData, setAttendanceData }) {
-    switch (user.role) {
-        case 'siswa':
-            return <SiswaDashboard 
-                        user={user} 
-                        showNotif={showNotif} 
-                        setAttendanceData={setAttendanceData}
-                    />;
-        case 'admin':
-            return <AdminDashboard 
-                        user={user} 
-                        showNotif={showNotif} 
-                        attendanceData={attendanceData}
-                        setAttendanceData={setAttendanceData}
-                    />;
-        default:
-            return <div>Role tidak dikenali.</div>;
-    }
-}
-
-// --- Dashboard Siswa (USER) -> HANYA UNTUK INPUT ABSENSI ---
-function SiswaDashboard({ user, showNotif, setAttendanceData }) {
-    // Nama dan kelas sekarang diambil dari data user yang login
-    const [fotoBukti, setFotoBukti] = useState(null);
-
-    const handleFileChange = (e) => {
-        if (e.target.files[0]) {
-            setFotoBukti(e.target.files[0]);
-        }
+    const handleLogout = () => {
+        currentUser = null;
+        updateUI();
     };
-
-    const handleAbsensi = (status) => {
+    
+    const handleAbsensi = (e) => {
+        const status = e.target.dataset.status;
         const tanggalHariIni = new Date().toISOString().slice(0, 10);
         const jamAbsen = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Jakarta' });
+        const fotoFile = fotoInput.files[0];
 
         const absenBaru = {
             id: Date.now(),
             jam: jamAbsen,
             tanggal: tanggalHariIni,
-            nama: user.nama, // Diambil dari user login
-            kelas: user.kelas, // Diambil dari user login
+            nama: currentUser.nama,
+            kelas: currentUser.kelas,
             status: status,
-            foto: fotoBukti ? URL.createObjectURL(fotoBukti) : null
+            foto: fotoFile ? URL.createObjectURL(fotoFile) : null
         };
-
-        setAttendanceData(currentData => [absenBaru, ...currentData]);
-        showNotif(`Absensi untuk ${user.nama} (${user.kelas}) sebagai '${status}' berhasil direkam.`, 'success');
         
-        // Reset form setelah absen
-        setFotoBukti(null);
-        if(document.getElementById('foto-input')) {
-            document.getElementById('foto-input').value = null; // Reset input file
-        }
-    };
-
-    return (
-        <div>
-            <h2 className="text-2xl font-bold mb-4">Form Absensi Siswa</h2>
-            
-            <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-                 <h3 className="text-xl font-semibold border-b pb-2 mb-4">Data Siswa</h3>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-500">Nama Lengkap</label>
-                        <p className="text-lg font-semibold">{user.nama}</p>
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-500">Kelas</label>
-                        <p className="text-lg font-semibold">{user.kelas}</p>
-                    </div>
-                </div>
-                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Foto Bukti (untuk Izin/Sakit)</label>
-                    <input 
-                        id="foto-input"
-                        type="file" 
-                        onChange={handleFileChange} 
-                        className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                    />
-                </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-                <h3 className="text-xl font-semibold mb-4">Pilih Kehadiran</h3>
-                <div className="flex space-x-4">
-                    <button onClick={() => handleAbsensi('Hadir')} className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors">Hadir</button>
-                    <button onClick={() => handleAbsensi('Izin')} className="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition-colors">Izin</button>
-                    <button onClick={() => handleAbsensi('Sakit')} className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition-colors">Sakit</button>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-
-// --- Dashboard Admin ---
-function AdminDashboard({ showNotif, attendanceData, setAttendanceData }) {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [currentItem, setCurrentItem] = useState(null);
-
-    const handleOpenModal = (item) => {
-        setCurrentItem(item);
-        setIsModalOpen(true);
-    };
-
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
-        setCurrentItem(null);
-    };
-
-    const handleSave = (itemData) => {
-        if (currentItem) {
-            setAttendanceData(attendanceData.map(l => l.id === currentItem.id ? { ...l, ...itemData } : l));
-            showNotif('Data absensi berhasil diperbarui.', 'success');
-        }
-        handleCloseModal();
+        attendanceData = [absenBaru, ...attendanceData];
+        showNotif(`Absensi untuk ${currentUser.nama} sebagai '${status}' berhasil direkam.`, 'success');
+        
+        fotoInput.value = null; // Reset input
+        updateUI();
     };
     
-    return (
-        <div>
-            <h2 className="text-2xl font-bold mb-6">Dashboard Admin</h2>
-            
-            {/* --- BAGIAN LAPORAN RIWAYAT ABSENSI --- */}
-            <div className="bg-white p-6 rounded-lg shadow-md">
-                <h3 className="text-xl font-semibold mb-4 border-b pb-2">Laporan Riwayat Absensi</h3>
-                <div className="overflow-x-auto">
-                    <table className="min-w-full text-sm">
-                        <thead className="bg-gray-100">
-                            <tr>
-                                <th className="p-2 text-left">Jam</th>
-                                <th className="p-2 text-left">Tanggal</th>
-                                <th className="p-2 text-left">Nama</th>
-                                <th className="p-2 text-left">Kelas</th>
-                                <th className="p-2 text-left">Status</th>
-                                <th className="p-2 text-center">Foto Bukti</th>
-                                <th className="p-2 text-center">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {attendanceData.map(item => (
-                                <tr key={item.id} className="border-t hover:bg-gray-50">
-                                    <td className="p-2">{item.jam}</td>
-                                    <td className="p-2">{item.tanggal}</td>
-                                    <td className="p-2">{item.nama}</td>
-                                    <td className="p-2">{item.kelas}</td>
-                                    <td className="p-2">{item.status}</td>
-                                    <td className="p-2 text-center">
-                                        {item.foto ? (
-                                            <a href={item.foto} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                                                Lihat Foto
-                                            </a>
-                                        ) : (
-                                            <span>-</span>
-                                        )}
-                                    </td>
-                                    <td className="p-2 text-center">
-                                        <button onClick={() => handleOpenModal(item)} className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 text-xs">Edit</button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                     {attendanceData.length === 0 && <p className="text-gray-500 text-center py-4">Belum ada data absensi yang masuk.</p>}
-                </div>
-            </div>
-            {isModalOpen && <AbsensiModal item={currentItem} onSave={handleSave} onClose={handleCloseModal} />}
-        </div>
-    );
-}
-
-// --- Komponen Modal untuk Edit Absensi ---
-function AbsensiModal({ item, onSave, onClose }) {
-    const [formData, setFormData] = useState({
-        nama: item?.nama || '',
-        kelas: item?.kelas || '',
-        tanggal: item?.tanggal || new Date().toISOString().slice(0, 10),
-        status: item?.status || 'Hadir',
-    });
-
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+    const handleOpenModal = (e) => {
+        if (e.target.classList.contains('edit-btn')) {
+            const id = Number(e.target.dataset.id);
+            const item = attendanceData.find(d => d.id === id);
+            if (item) {
+                editForm.id.value = item.id;
+                editForm.nama.value = item.nama;
+                editForm.kelas.value = item.kelas;
+                editForm.tanggal.value = item.tanggal;
+                editForm.status.value = item.status;
+                editModal.classList.remove('hidden');
+            }
+        }
     };
 
-    const handleSubmit = (e) => {
+    const handleSaveEdit = (e) => {
         e.preventDefault();
-        onSave(formData);
+        const id = Number(e.target.id.value);
+        const updatedItem = {
+            nama: e.target.nama.value,
+            kelas: e.target.kelas.value,
+            tanggal: e.target.tanggal.value,
+            status: e.target.status.value,
+        };
+
+        attendanceData = attendanceData.map(item => 
+            item.id === id ? { ...item, ...updatedItem } : item
+        );
+        
+        showNotif('Data absensi berhasil diperbarui.', 'success');
+        editModal.classList.add('hidden');
+        updateUI();
     };
 
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
-                <h2 className="text-2xl font-bold mb-6">Edit Absensi</h2>
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Nama Siswa</label>
-                        <input type="text" name="nama" value={formData.nama} onChange={handleChange} className="w-full px-3 py-2 border rounded" required />
-                    </div>
-                     <div className="mb-4">
-                        <label className="block text-gray-700">Kelas</label>
-                        <input type="text" name="kelas" value={formData.kelas} onChange={handleChange} className="w-full px-3 py-2 border rounded" required />
-                    </div>
-                     <div className="mb-4">
-                        <label className="block text-gray-700">Tanggal</label>
-                        <input type="date" name="tanggal" value={formData.tanggal} onChange={handleChange} className="w-full px-3 py-2 border rounded" required />
-                    </div>
-                    <div className="mb-6">
-                        <label className="block text-gray-700">Status</label>
-                        <select name="status" value={formData.status} onChange={handleChange} className="w-full px-3 py-2 border rounded">
-                            <option value="Hadir">Hadir</option>
-                            <option value="Izin">Izin</option>
-                            <option value="Sakit">Sakit</option>
-                            <option value="Alfa">Alfa</option>
-                        </select>
-                    </div>
-                    <div className="flex justify-end gap-4">
-                        <button type="button" onClick={onClose} className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
-                            Batal
-                        </button>
-                        <button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-                            Simpan
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
-}
+    // --- EVENT LISTENERS INITIALIZATION ---
+    loginForm.addEventListener('submit', handleLogin);
+    absenButtons.forEach(btn => btn.addEventListener('click', handleAbsensi));
+    adminTableBody.addEventListener('click', handleOpenModal);
+    cancelEditBtn.addEventListener('click', () => editModal.classList.add('hidden'));
+    editForm.addEventListener('submit', handleSaveEdit);
 
+    // --- INITIAL RENDER ---
+    updateUI();
+});
+</script>
 
-// --- Komponen Notifikasi ---
-function Notification({ message, type }) {
-    const baseStyle = "p-4 rounded-md mb-4 text-white";
-    const typeStyle = {
-      success: 'bg-green-500',
-      error: 'bg-red-500',
-      info: 'bg-blue-500'
-    }[type] || 'bg-gray-500';
-
-    return <div className={`${baseStyle} ${typeStyle}`}>{message}</div>;
-}
-
+</body>
+</html>
