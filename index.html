@@ -228,7 +228,9 @@
                                             <th class="p-3 text-left font-semibold">Jam</th>
                                             <th class="p-3 text-left font-semibold">Tanggal</th>
                                             <th class="p-3 text-left font-semibold">Nama</th>
+                                            <th class="p-3 text-left font-semibold">Kelas</th>
                                             <th class="p-3 text-left font-semibold">Status</th>
+                                            <th class="p-3 text-center font-semibold">Foto Bukti</th>
                                             <th class="p-3 text-center font-semibold">Aksi</th>
                                         </tr>
                                     </thead>
@@ -428,12 +430,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td class="p-3">${item.jam}</td>
                 <td class="p-3">${item.tanggal}</td>
                 <td class="p-3">${item.nama}</td>
+                <td class="p-3">${item.kelas}</td>
                 <td class="p-3">${item.status}</td>
+                <td class="p-3 text-center">${fotoLink}</td>
                 <td class="p-3 text-center">
                     <button data-id="${item.id}" class="edit-btn bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 text-xs">Edit</button>
                 </td>
             `;
-            // Kolom foto bukti dan kelas dihapus dari tabel utama untuk membuatnya lebih ringkas
             adminTableBody.appendChild(row);
         });
     };
@@ -641,6 +644,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
-
-
 
