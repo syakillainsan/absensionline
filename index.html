@@ -3,284 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Absensi Sekolah</title>
+    <title>Sistem Absensi Sekolah (Supabase)</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Style untuk wallpaper halaman login */
         .login-wallpaper {
-            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=2128&auto=format&fit=crop');
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?q=80&w=2128&auto=format&fit=crop');
             background-size: cover;
             background-position: center;
         }
-        .card {
-            @apply bg-white p-6 rounded-xl shadow-lg border border-slate-200;
-        }
-        .btn {
-            @apply font-bold py-2 px-4 rounded-lg shadow-md transition-transform duration-150 ease-in-out hover:scale-105 focus:outline-none focus:ring-2 focus:ring-opacity-75;
-        }
-        .btn-primary {
-            @apply bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500;
-        }
-        .btn-green {
-             @apply bg-green-600 hover:bg-green-700 text-white focus:ring-green-500;
-        }
-        .btn-red {
-             @apply bg-red-600 hover:bg-red-700 text-white focus:ring-red-500;
-        }
-        .btn-yellow {
-             @apply bg-yellow-500 hover:bg-yellow-600 text-white focus:ring-yellow-500;
-        }
-         .btn-orange {
-             @apply bg-orange-500 hover:bg-orange-600 text-white focus:ring-orange-500;
-        }
+        .card { @apply bg-white p-6 rounded-xl shadow-md border border-slate-100; }
+        .btn { @apply font-bold py-2.5 px-6 rounded-lg shadow-sm transition-all duration-200 ease-in-out hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2; }
+        .btn-primary { @apply bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500; }
+        .btn-green { @apply bg-emerald-600 hover:bg-emerald-700 text-white focus:ring-emerald-500; }
+        .btn-red { @apply bg-rose-600 hover:bg-rose-700 text-white focus:ring-rose-500; }
+        .input-field { @apply w-full px-4 py-2 mt-1 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors; }
     </style>
 </head>
-<body class="bg-slate-100 min-h-screen font-sans">
+<body class="bg-slate-50 min-h-screen font-sans text-slate-800">
 
     <div id="app-container" class="w-full">
         <!-- HEADER -->
-        <header id="app-header" class="bg-white shadow-md sticky top-0 z-40 border-b-2 border-slate-200">
-            <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+        <header id="app-header" class="bg-white shadow-sm sticky top-0 z-40 border-b border-slate-200">
+            <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-                       <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 16c1.255 0 2.443-.29 3.5-.804V4.804zM14.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 0114.5 16c1.255 0 2.443-.29 3.5-.804v-10A7.968 7.968 0 0014.5 4z" />
-                    </svg>
-                    <h1 class="text-xl font-bold text-slate-800">Sistem Absensi Sekolah</h1>
+                    <div class="bg-blue-600 p-2 rounded-lg text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                    </div>
+                    <h1 class="text-xl font-bold text-slate-800 hidden md:block">Sistem Absensi Sekolah</h1>
                 </div>
-                <div id="user-info">
-                    <p class="text-gray-600">Silakan login</p>
-                </div>
+                <div id="user-info" class="text-sm"></div>
             </nav>
         </header>
 
         <!-- MAIN CONTENT -->
-        <main class="container mx-auto px-6 py-8">
-            <!-- Notification Placeholder -->
-            <div id="notification" class="hidden"></div>
-
-            <!-- LOGIN PAGE -->
-            <div id="login-page">
-                <div class="max-w-md mx-auto bg-white/95 backdrop-blur-sm p-8 rounded-xl shadow-2xl border border-slate-200">
-                    <div class="flex justify-center mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-                           <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 16c1.255 0 2.443-.29 3.5-.804V4.804zM14.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 0114.5 16c1.255 0 2.443-.29 3.5-.804v-10A7.968 7.968 0 0014.5 4z" />
-                        </svg>
-                    </div>
-                    <h2 class="text-3xl font-bold mb-6 text-center text-slate-800">Selamat Datang</h2>
-                    <form id="login-form">
-                        <div class="mb-4">
-                            <label class="block text-gray-700 font-medium">Username</label>
-                            <input type="text" name="username" placeholder="Masukkan username Anda" class="w-full px-4 py-2 mt-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required />
-                        </div>
-                        <div class="mb-6">
-                            <label class="block text-gray-700 font-medium">Password</label>
-                            <input type="password" name="password" placeholder="Masukkan password Anda" class="w-full px-4 py-2 mt-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required />
-                        </div>
-                        <button type="submit" class="w-full btn btn-primary">
-                            Login
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- DASHBOARD CONTAINER (HIDDEN INITIALLY) -->
-            <div id="dashboard" class="hidden">
-                <!-- SISWA DASHBOARD -->
-                <div id="siswa-dashboard" class="hidden space-y-6">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-3xl font-bold text-slate-800">Halo, <span id="siswa-nama-header">Siswa</span>!</h2>
-                        <div class="text-right">
-                            <p id="siswa-kelas" class="font-semibold text-slate-700 text-lg"></p>
-                            <p class="text-sm text-slate-500">Kelas</p>
-                        </div>
-                    </div>
-                    
-                    <div class="card text-center">
-                        <h3 class="text-xl font-semibold mb-2 text-slate-700">Absensi Hari Ini</h3>
-                        <p class="text-slate-500 mb-8">Pilih status kehadiranmu di bawah ini.</p>
-                         <div id="attendance-status-message" class="hidden"></div>
-
-
-                        <div id="attendance-buttons" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <!-- Tombol Hadir -->
-                            <button data-status="Hadir" class="absen-btn group flex flex-col items-center justify-center p-6 bg-green-50 hover:bg-green-100 border-2 border-green-200 hover:border-green-400 rounded-xl transition-all duration-200 transform hover:-translate-y-1">
-                                <div class="bg-green-200 rounded-full p-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-700" viewBox="0 0 20 20" fill="currentColor">
-                                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <span class="text-lg font-bold text-green-800 mt-3">Hadir</span>
-                            </button>
-
-                            <!-- Tombol Izin -->
-                             <button data-status="Izin" class="absen-btn group flex flex-col items-center justify-center p-6 bg-yellow-50 hover:bg-yellow-100 border-2 border-yellow-200 hover:border-yellow-400 rounded-xl transition-all duration-200 transform hover:-translate-y-1">
-                                <div class="bg-yellow-200 rounded-full p-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-700" viewBox="0 0 20 20" fill="currentColor">
-                                      <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                                      <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                                    </svg>
-                                </div>
-                                <span class="text-lg font-bold text-yellow-800 mt-3">Izin</span>
-                            </button>
-
-                            <!-- Tombol Sakit -->
-                            <button data-status="Sakit" class="absen-btn group flex flex-col items-center justify-center p-6 bg-orange-50 hover:bg-orange-100 border-2 border-orange-200 hover:border-orange-400 rounded-xl transition-all duration-200 transform hover:-translate-y-1">
-                                 <div class="bg-orange-200 rounded-full p-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-orange-700" viewBox="0 0 20 20" fill="currentColor">
-                                      <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                                    </svg>
-                                 </div>
-                                <span class="text-lg font-bold text-orange-800 mt-3">Sakit</span>
-                            </button>
-                        </div>
-
-                        <div class="mt-8 border-t border-slate-200 pt-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Kirim Foto Bukti (untuk Izin/Sakit)</label>
-                            <input id="foto-input" type="file" class="mx-auto block w-full max-w-sm text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer" />
-                        </div>
-                    </div>
-                </div>
-
-
-                <!-- ADMIN DASHBOARD -->
-                <div id="admin-dashboard" class="hidden space-y-8">
-                     <h2 class="text-3xl font-bold text-slate-800">Dashboard Admin</h2>
-
-                     <!-- STATS CARDS -->
-                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                         <!-- Total Siswa Card -->
-                         <div class="card flex items-center p-4">
-                            <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a3.001 3.001 0 015.656 0M9 9a3 3 0 116 0 3 3 0 01-6 0z" /></svg>
-                            </div>
-                            <div>
-                                <p class="text-sm text-slate-500 font-medium">Total Siswa</p>
-                                <p id="stats-total-siswa" class="text-2xl font-bold text-slate-800">0</p>
-                            </div>
-                         </div>
-                         <!-- Hadir Hari Ini Card -->
-                         <div class="card flex items-center p-4">
-                            <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
-                               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            </div>
-                            <div>
-                                <p class="text-sm text-slate-500 font-medium">Hadir Hari Ini</p>
-                                <p id="stats-hadir-hari-ini" class="text-2xl font-bold text-slate-800">0</p>
-                            </div>
-                         </div>
-                          <!-- Izin/Sakit Hari Ini Card -->
-                         <div class="card flex items-center p-4">
-                            <div class="p-3 rounded-full bg-yellow-100 text-yellow-600 mr-4">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            </div>
-                            <div>
-                                <p class="text-sm text-slate-500 font-medium">Izin/Sakit Hari Ini</p>
-                                <p id="stats-izin-sakit-hari-ini" class="text-2xl font-bold text-slate-800">0</p>
-                            </div>
-                         </div>
-                         <!-- Total Absensi Card -->
-                          <div class="card flex items-center p-4">
-                            <div class="p-3 rounded-full bg-indigo-100 text-indigo-600 mr-4">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
-                            </div>
-                            <div>
-                                <p class="text-sm text-slate-500 font-medium">Total Absensi</p>
-                                <p id="stats-total-absensi" class="text-2xl font-bold text-slate-800">0</p>
-                            </div>
-                         </div>
-                     </div>
-
-                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                         <!-- Peringkat & Manajemen -->
-                         <div class="lg:col-span-1 space-y-8">
-                             <!-- Peringkat Kehadiran -->
-                             <div class="card">
-                                <h3 class="text-xl font-semibold mb-4 border-b border-slate-200 pb-3 text-slate-700">Peringkat Kehadiran</h3>
-                                <div id="ranking-chart" class="space-y-3">
-                                   <!-- Chart akan di-render oleh JavaScript -->
-                                </div>
-                             </div>
-
-                             <!-- Manajemen Pengguna -->
-                             <div class="card">
-                                <h3 class="text-xl font-semibold mb-4 border-b border-slate-200 pb-3 text-slate-700">Manajemen Data</h3>
-                                <div class="flex flex-col items-start gap-4">
-                                    <button id="export-btn" class="btn btn-green flex items-center gap-2 w-full justify-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-                                        Export Data Siswa
-                                    </button>
-                                    <button id="import-btn" class="btn btn-primary flex items-center gap-2 w-full justify-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" /></svg>
-                                        Import Data Siswa
-                                    </button>
-                                    <input type="file" id="import-file" class="hidden" accept=".csv" />
-                                </div>
-                             </div>
-                         </div>
-
-                         <!-- Laporan Riwayat -->
-                         <div class="lg:col-span-2 card">
-                            <h3 class="text-xl font-semibold mb-4 border-b border-slate-200 pb-3 text-slate-700">Laporan Riwayat Absensi</h3>
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full text-sm">
-                                    <thead class="bg-slate-100 text-slate-600">
-                                        <tr>
-                                            <th class="p-3 text-left font-semibold">Jam</th>
-                                            <th class="p-3 text-left font-semibold">Tanggal</th>
-                                            <th class="p-3 text-left font-semibold">Nama</th>
-                                            <th class="p-3 text-left font-semibold">Kelas</th>
-                                            <th class="p-3 text-left font-semibold">Status</th>
-                                            <th class="p-3 text-center font-semibold">Foto Bukti</th>
-                                            <th class="p-3 text-center font-semibold">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="admin-table-body">
-                                        <!-- Data akan diisi oleh JavaScript -->
-                                    </tbody>
-                                </table>
-                                <p id="no-data-message" class="text-gray-500 text-center py-4 hidden">Belum ada data absensi yang masuk.</p>
-                            </div>
-                        </div>
-                     </div>
-                </div>
+        <main class="container mx-auto px-4 md:px-6 py-8 flex-grow">
+            <div id="notification" class="fixed top-20 right-4 z-50 hidden transition-all duration-300"></div>
+            <div id="app-content" class="h-full">
+                <!-- Content will be rendered by JavaScript -->
             </div>
         </main>
     </div>
 
     <!-- MODAL (HIDDEN INITIALLY) -->
-    <div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 hidden">
-        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+    <div id="edit-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50 hidden transition-opacity">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md mx-4">
             <h2 class="text-2xl font-bold mb-6 text-slate-800">Edit Absensi</h2>
             <form id="edit-form">
                 <input type="hidden" name="id" />
                 <div class="mb-4">
-                    <label class="block text-gray-700">Nama Siswa</label>
-                    <input type="text" name="nama" class="w-full px-3 py-2 border rounded-lg" required />
+                    <label class="block text-sm font-medium text-slate-600">Nama Siswa</label>
+                    <input type="text" name="nama" class="input-field" required />
                 </div>
                  <div class="mb-4">
-                    <label class="block text-gray-700">Kelas</label>
-                    <input type="text" name="kelas" class="w-full px-3 py-2 border rounded-lg" required />
+                    <label class="block text-sm font-medium text-slate-600">Kelas</label>
+                    <input type="text" name="kelas" class="input-field" required />
                 </div>
-                 <div class="mb-4">
-                    <label class="block text-gray-700">Tanggal</label>
-                    <input type="date" name="tanggal" class="w-full px-3 py-2 border rounded-lg" required />
-                </div>
-                <div class="mb-6">
-                    <label class="block text-gray-700">Status</label>
-                    <select name="status" class="w-full px-3 py-2 border rounded-lg">
+                 <div class="mb-6">
+                    <label class="block text-sm font-medium text-slate-600">Status Kehadiran</label>
+                    <select name="status" class="input-field">
                         <option value="Hadir">Hadir</option>
                         <option value="Izin">Izin</option>
                         <option value="Sakit">Sakit</option>
-                        <option value="Alfa">Alfa</option>
                     </select>
                 </div>
-                <div class="flex justify-end gap-4">
-                    <button type="button" id="cancel-edit-btn" class="btn bg-gray-300 hover:bg-gray-400 text-gray-800">
-                        Batal
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        Simpan
-                    </button>
+                <div class="flex justify-end gap-3">
+                    <button type="button" id="cancel-edit-btn" class="px-4 py-2 rounded-lg font-medium text-slate-600 hover:bg-slate-100 transition-colors">Batal</button>
+                    <button type="submit" class="btn btn-primary py-2">Simpan Perubahan</button>
                 </div>
             </form>
         </div>
@@ -290,358 +79,316 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- DATA & STATE MANAGEMENT ---
-    let currentUser = null;
-    let dummyUsers = {
-        "admin": { password: "admin123", role: "admin", nama: "Admin Sekolah" },
-        "aldebaran": { password: "password123", role: "siswa", nama: "Aldebaran Adam Syahputra", kelas: "XII-D" }, "anzilah": { password: "password123", role: "siswa", nama: "Anzilah Nurcahaya", kelas: "XII-D" }, "aulia": { password: "password123", role: "siswa", nama: "Aulia Danish", kelas: "XII-D" }, "chairil": { password: "password123", role: "siswa", nama: "Chairil Ahmad Fathir", kelas: "XII-D" }, "daiva": { password: "password123", role: "siswa", nama: "Daiva Bhagja Wangsapriyatman", kelas: "XII-D" }, "dellaluna": { password: "password123", role: "siswa", nama: "Dellaluna Nur Agustina", kelas: "XII-D" }, "denian": { password: "password123", role: "siswa", nama: "Denian Prasetya", kelas: "XII-D" }, "fadhillah": { password: "password123", role: "siswa", nama: "Fadhillah Nursyifa", kelas: "XII-D" }, "ghaisan": { password: "password123", role: "siswa", nama: "Ghaisan Rafani", kelas: "XII-D" }, "hasna": { password: "password123", role: "siswa", nama: "Hasna Fauziah Aqila", kelas: "XII-D" }, "heni": { password: "password123", role: "siswa", nama: "Heni Ramadhani", kelas: "XII-D" }, "iyan": { password: "password123", role: "siswa", nama: "Iyan Apriansa", kelas: "XII-D" }, "keihsa": { password: "password123", role: "siswa", nama: "Keihsa Anindya Danastri H", kelas: "XII-D" }, "kintan": { password: "password123", role: "siswa", nama: "Kintan Putri Haryono", kelas: "XII-D" }, "fajri": { password: "password123", role: "siswa", nama: "Fajri Bakkah", kelas: "XII-D" }, "farhan": { password: "password123", role: "siswa", nama: "Farhan", kelas: "XII-D" }, "nabil": { password: "password123", role: "siswa", nama: "Nabil Fadlurrohman", kelas: "XII-D" }, "ridhan": { password: "password123", role: "siswa", nama: "Ridhan Fajari", kelas: "XII-D" }, "rizqy": { password: "password123", role: "siswa", nama: "Rizqy Irza Saputra", kelas: "XII-D" }, "nadia": { password: "password123", role: "siswa", nama: "Nadia Aprianca Putri", kelas: "XII-D" }, "naisya": { password: "password123", role: "siswa", nama: "Naisya Aufiya Indri", kelas: "XII-D" }, "nasya": { password: "password123", role: "siswa", nama: "Nasya Tri Febriyani", kelas: "XII-D" }, "naya": { password: "password123", role: "siswa", nama: "Naya Nardiana", kelas: "XII-D" }, "nur": { password: "password123", role: "siswa", nama: "Nur Maya Aini", kelas: "XII-D" }, "puspita": { password: "password123", role: "siswa", nama: "Puspita Widia Kusumaningsih", kelas: "XII-D" }, "puteri": { password: "password123", role: "siswa", nama: "Puteri Rosmayanti", kelas: "XII-D" }, "rafa": { password: "password123", role: "siswa", nama: "Rafa Yanwardi Azhar", kelas: "XII-D" }, "raka": { password: "password123", role: "siswa", nama: "Raka Alif Al Aziz", kelas: "XII-D" }, "resti": { password: "password123", role: "siswa", nama: "Resti Julianti", kelas: "XII-D" }, "siti": { password: "password123", role: "siswa", nama: "Siti Nurmalia Ramadhan", kelas: "XII-D" }, "sultan": { password: "password123", role: "siswa", nama: "Sultan Fardhan Anggestu", kelas: "XII-D" }, "sumayyah": { password: "password123", role: "siswa", nama: "Sumayyah Dema Nazihah", kelas: "XII-D" }, "syafira": { password: "password123", role: "siswa", nama: "Syafira Ramadhani", kelas: "XII-D" }, "syakilla": { password: "password123", role: "siswa", nama: "Syakilla Insan Sabria", kelas: "XII-D" }, "syifa": { password: "password123", role: "siswa", nama: "Syifa Amelia Dalimunthe", kelas: "XII-D" }, "zahratunnisa": { password: "password123", role: "siswa", nama: "Zahratunnisa", kelas: "XII-D" },
-    };
-    let attendanceData = [
-        { id: 1, jam: '07:05:12', tanggal: '2025-09-29', nama: 'Aldebaran Adam Syahputra', kelas: 'XII-D', status: 'Hadir', foto: null},
-        { id: 2, jam: '08:15:30', tanggal: '2025-09-29', nama: 'Anzilah Nurcahaya', kelas: 'XII-D', status: 'Sakit', foto: 'https://placehold.co/600x400/orange/white?text=Surat+Sakit'},
-        { id: 3, jam: '07:10:00', tanggal: '2025-09-29', nama: 'Aulia Danish', kelas: 'XII-D', status: 'Hadir', foto: null},
-        { id: 4, jam: '07:00:00', tanggal: '2025-09-30', nama: 'Aldebaran Adam Syahputra', kelas: 'XII-D', status: 'Hadir', foto: null},
-        { id: 5, jam: '07:02:00', tanggal: '2025-10-01', nama: 'Aldebaran Adam Syahputra', kelas: 'XII-D', status: 'Hadir', foto: null},
-        { id: 6, jam: '07:02:00', tanggal: '2025-10-01', nama: 'Aulia Danish', kelas: 'XII-D', status: 'Izin', foto: null},
-    ];
-
-    // --- DOM ELEMENT SELECTORS ---
-    const body = document.body;
-    const loginPage = document.getElementById('login-page');
-    const dashboard = document.getElementById('dashboard');
-    const siswaDashboard = document.getElementById('siswa-dashboard');
-    const adminDashboard = document.getElementById('admin-dashboard');
-    const loginForm = document.getElementById('login-form');
-    const userInfo = document.getElementById('user-info');
-    const adminTableBody = document.getElementById('admin-table-body');
-    const noDataMessage = document.getElementById('no-data-message');
-    const notifElement = document.getElementById('notification');
-    const siswaNamaHeader = document.getElementById('siswa-nama-header');
-    const siswaKelas = document.getElementById('siswa-kelas');
-    const fotoInput = document.getElementById('foto-input');
-    const absenButtons = document.querySelectorAll('.absen-btn');
-    const attendanceButtonsContainer = document.getElementById('attendance-buttons');
-    const attendanceStatusMessage = document.getElementById('attendance-status-message');
-    const editModal = document.getElementById('edit-modal');
-    const editForm = document.getElementById('edit-form');
-    const cancelEditBtn = document.getElementById('cancel-edit-btn');
-    const exportBtn = document.getElementById('export-btn');
-    const importBtn = document.getElementById('import-btn');
-    const importFileInput = document.getElementById('import-file');
-    const rankingChart = document.getElementById('ranking-chart');
-    const statsTotalSiswa = document.getElementById('stats-total-siswa');
-    const statsHadirHariIni = document.getElementById('stats-hadir-hari-ini');
-    const statsIzinSakitHariIni = document.getElementById('stats-izin-sakit-hari-ini');
-    const statsTotalAbsensi = document.getElementById('stats-total-absensi');
+    // --- KONFIGURASI SUPABASE (WAJIB DIISI) ---
+    const SUPABASE_URL = 'https://eszxwkbijbgmghvwhtsh.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzenh3a2JpamJnbWdodndodHNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzMDA5MDcsImV4cCI6MjA3NTg3NjkwN30.ETtXRg_N2ANy17GLQG8Q3t7vlHk4Z5jsXNAGC4ILqwY';
     
-
-    // --- FUNCTIONS ---
-    const showNotif = (message, type = 'success') => {
-        const typeStyle = {
-          success: 'bg-green-500', error: 'bg-red-500', info: 'bg-blue-500'
-        }[type] || 'bg-gray-500';
-        notifElement.className = `p-4 rounded-lg mb-4 text-white font-semibold shadow-lg ${typeStyle}`;
-        notifElement.textContent = message;
-        notifElement.classList.remove('hidden');
-        setTimeout(() => {
-            notifElement.classList.add('hidden');
-        }, 4000);
-    };
-
-    const renderAdminStats = () => {
-        const totalSiswa = Object.values(dummyUsers).filter(u => u.role === 'siswa').length;
-        statsTotalSiswa.textContent = totalSiswa;
-
-        const today = new Date().toISOString().slice(0, 10);
-        const todayAttendance = attendanceData.filter(d => d.tanggal === today);
-        
-        const hadirHariIni = todayAttendance.filter(d => d.status === 'Hadir').length;
-        statsHadirHariIni.textContent = hadirHariIni;
-        
-        const izinSakitHariIni = todayAttendance.filter(d => d.status === 'Izin' || d.status === 'Sakit').length;
-        statsIzinSakitHariIni.textContent = izinSakitHariIni;
-
-        statsTotalAbsensi.textContent = attendanceData.length;
-    };
-
-
-    const renderRankingChart = () => {
-        rankingChart.innerHTML = ''; // Clear previous chart
-
-        const attendanceCounts = {};
-        Object.values(dummyUsers).forEach(user => {
-            if (user.role === 'siswa') {
-                attendanceCounts[user.nama] = 0; // Inisialisasi semua siswa dengan 0
-            }
-        });
-
-        attendanceData.forEach(item => {
-            if(item.status === 'Hadir') {
-                attendanceCounts[item.nama] = (attendanceCounts[item.nama] || 0) + 1;
-            }
-        });
-
-        const sortedStudents = Object.entries(attendanceCounts)
-            .map(([nama, hadir]) => ({ nama, hadir }))
-            .sort((a, b) => b.hadir - a.hadir);
-
-        if (sortedStudents.length === 0) {
-            rankingChart.innerHTML = `<p class="text-gray-500">Belum ada data 'Hadir' untuk ditampilkan.</p>`;
-            return;
-        }
-
-        const maxHadir = sortedStudents.length > 0 ? sortedStudents[0].hadir : 0;
-
-        sortedStudents.slice(0, 7).forEach(student => { // Tampilkan top 7
-            const barWidth = maxHadir > 0 ? (student.hadir / maxHadir) * 100 : 0;
-            const chartItem = document.createElement('div');
-            chartItem.className = 'grid grid-cols-3 gap-2 items-center text-sm';
-            chartItem.innerHTML = `
-                <span class="font-medium text-gray-700 truncate">${student.nama}</span>
-                <div class="col-span-2 bg-slate-200 rounded-full h-6">
-                    <div class="bg-gradient-to-r from-blue-500 to-cyan-400 h-6 rounded-full flex items-center justify-between px-2 text-white font-bold text-xs" style="width: ${barWidth}%;">
-                        <span>${student.hadir} Hadir</span>
+    if (SUPABASE_URL.includes('URL_PROYEK') || SUPABASE_ANON_KEY.includes('KUNCI_ANON')) {
+        document.getElementById('app-content').innerHTML = `
+            <div class="max-w-2xl mx-auto bg-amber-50 border-l-4 border-amber-400 p-4 rounded-md text-amber-700">
+                <div class="flex">
+                    <div class="flex-shrink-0"><svg class="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg></div>
+                    <div class="ml-3">
+                        <h3 class="text-lg font-medium">Konfigurasi Diperlukan</h3>
+                        <div class="mt-2 text-sm"><p>Silakan buka file ini di text editor dan isi <strong>SUPABASE_URL</strong> serta <strong>SUPABASE_ANON_KEY</strong> dengan kredensial dari proyek Supabase Anda.</p></div>
                     </div>
                 </div>
-            `;
-            rankingChart.appendChild(chartItem);
-        });
+            </div>`;
+        return;
+    }
+
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // --- VARIABLES ---
+    let currentUser = null;
+    let currentPage = 'login';
+
+    // --- ELEMENTS ---
+    const body = document.body;
+    const userInfo = document.getElementById('user-info');
+    const appContent = document.getElementById('app-content');
+    const notifElement = document.getElementById('notification');
+    const editModal = document.getElementById('edit-modal');
+    const editForm = document.getElementById('edit-form');
+
+    // --- TEMPLATES HTML ---
+    const loginTemplate = `
+        <div class="min-h-[80vh] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+            <div class="sm:mx-auto sm:w-full sm:max-w-md">
+                <div class="bg-white py-8 px-4 shadow-xl rounded-2xl sm:px-10 border border-slate-100">
+                    <div class="sm:mx-auto sm:w-full sm:max-w-[200px] mb-6">
+                       <div class="flex justify-center text-blue-600 mb-4">
+                           <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                       </div>
+                       <h2 class="text-center text-3xl font-extrabold text-slate-900">Login Akun</h2>
+                    </div>
+                    <form id="login-form" class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700">Username</label>
+                            <div class="mt-1"><input type="text" name="username" required class="input-field" placeholder="Masukkan username Anda" /></div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700">Password</label>
+                            <div class="mt-1"><input type="password" name="password" required class="input-field" placeholder="••••••••" /></div>
+                        </div>
+                        <div>
+                            <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
+                                Masuk Sekarang
+                            </button>
+                        </div>
+                    </form>
+                    <div class="mt-6">
+                        <div class="relative">
+                            <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-300"></div></div>
+                            <div class="relative flex justify-center text-sm"><span class="px-2 bg-white text-slate-500">Atau</span></div>
+                        </div>
+                        <div class="mt-6 text-center">
+                            <p class="text-slate-600">Belum memiliki akun? <button id="switch-to-register" class="font-medium text-blue-600 hover:text-blue-500 transition-colors">Daftar di sini</button></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
+    const registerTemplate = `
+        <div class="min-h-[80vh] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+            <div class="sm:mx-auto sm:w-full sm:max-w-md">
+                <div class="bg-white py-8 px-4 shadow-xl rounded-2xl sm:px-10 border border-slate-100">
+                    <h2 class="mb-6 text-center text-3xl font-extrabold text-slate-900">Buat Akun Baru</h2>
+                    <form id="register-form" class="space-y-5">
+                        <div><label class="block text-sm font-medium text-slate-700">Nama Lengkap</label><input type="text" name="nama_lengkap" required class="input-field" placeholder="Contoh: Budi Santoso" /></div>
+                        <div><label class="block text-sm font-medium text-slate-700">Username (Unik)</label><input type="text" name="username" required pattern="^[a-zA-Z0-9_]{3,}$" title="Minimal 3 karakter, huruf, angka, atau '_'" class="input-field" placeholder="Contoh: budi_s" /></div>
+                        <div><label class="block text-sm font-medium text-slate-700">Email</label><input type="email" name="email" required class="input-field" placeholder="budi@example.com" /></div>
+                        <div><label class="block text-sm font-medium text-slate-700">Password</label><input type="password" name="password" required minlength="8" class="input-field" placeholder="Minimal 8 karakter" /></div>
+                        <div><label class="block text-sm font-medium text-slate-700">Kelas (Siswa)</label><input type="text" name="kelas" required class="input-field" placeholder="Contoh: XII-IPA 1" /></div>
+                        <button type="submit" class="w-full btn btn-primary py-3 mt-4">Daftar Sekarang</button>
+                    </form>
+                    <p class="mt-6 text-center text-slate-600">Sudah punya akun? <button id="switch-to-login" class="font-medium text-blue-600 hover:text-blue-500 transition-colors">Login di sini</button></p>
+                </div>
+            </div>
+        </div>`;
+
+    // --- HELPER FUNCTIONS ---
+    const showNotif = (message, type = 'success') => {
+        notifElement.className = `fixed top-6 right-6 z-50 p-4 rounded-xl shadow-lg text-white font-semibold transform transition-all duration-500 ease-out translate-y-0 opacity-100 flex items-center gap-3 ${type === 'success' ? 'bg-emerald-500' : 'bg-rose-500'}`;
+        notifElement.innerHTML = `${type === 'success' ? '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'} <span>${message}</span>`;
+        notifElement.classList.remove('hidden', 'translate-y-[-100%]', 'opacity-0');
+        setTimeout(() => notifElement.classList.add('translate-y-[-100%]', 'opacity-0'), 3000);
+        setTimeout(() => notifElement.classList.add('hidden'), 3500);
     };
 
-    const renderAdminTable = () => {
-        adminTableBody.innerHTML = ''; // Clear table
-        if (attendanceData.length === 0) {
-            noDataMessage.classList.remove('hidden');
-            return;
-        }
-        noDataMessage.classList.add('hidden');
+    // --- MAIN RENDER FUNCTION ---
+    const render = async () => {
+        const { data: { session } } = await supabaseClient.auth.getSession();
 
-        const sortedData = [...attendanceData].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal) || b.jam.localeCompare(a.jam));
-
-        sortedData.forEach(item => {
-            const row = document.createElement('tr');
-            row.className = 'border-t border-slate-200 hover:bg-slate-50';
-            
-            const fotoLink = item.foto 
-                ? `<a href="${item.foto}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-semibold">Lihat</a>` 
-                : '<span class="text-slate-400">-</span>';
-
-            row.innerHTML = `
-                <td class="p-3">${item.jam}</td>
-                <td class="p-3">${item.tanggal}</td>
-                <td class="p-3">${item.nama}</td>
-                <td class="p-3">${item.kelas}</td>
-                <td class="p-3">${item.status}</td>
-                <td class="p-3 text-center">${fotoLink}</td>
-                <td class="p-3 text-center">
-                    <button data-id="${item.id}" class="edit-btn bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 text-xs">Edit</button>
-                </td>
-            `;
-            adminTableBody.appendChild(row);
-        });
-    };
-
-    const updateUI = () => {
-        if (currentUser) {
-            // User is logged in
-            body.className = "bg-slate-100 min-h-screen font-sans";
-            loginPage.style.display = 'none';
-            dashboard.style.display = 'block';
-            
-            userInfo.innerHTML = `
-                <span class="mr-4 text-gray-700">Halo, <span class="font-bold">${currentUser.nama}</span></span>
-                <button id="logout-btn" class="btn btn-red">Logout</button>
-            `;
-            document.getElementById('logout-btn').addEventListener('click', handleLogout);
-
-            if (currentUser.role === 'admin') {
-                adminDashboard.style.display = 'block';
-                siswaDashboard.style.display = 'none';
-                renderAdminStats();
-                renderAdminTable();
-                renderRankingChart();
-            } else if (currentUser.role === 'siswa') {
-                adminDashboard.style.display = 'none';
-                siswaDashboard.style.display = 'block';
-                siswaNamaHeader.textContent = currentUser.nama.split(' ')[0];
-                siswaKelas.textContent = currentUser.kelas;
-                
-                const tanggalHariIni = new Date().toISOString().slice(0, 10);
-                const absensiHariIni = attendanceData.find(item => 
-                    item.nama === currentUser.nama && item.tanggal === tanggalHariIni
-                );
-
-                if (absensiHariIni) {
-                    attendanceButtonsContainer.classList.add('hidden');
-                    attendanceStatusMessage.classList.remove('hidden');
-                    attendanceStatusMessage.className = 'p-4 rounded-lg bg-green-100 text-green-800 font-semibold text-center';
-                    attendanceStatusMessage.textContent = `Anda sudah tercatat '${absensiHariIni.status}' hari ini. Terima kasih!`;
+        if (session) {
+            if (!currentUser) {
+                const { data: profile, error } = await supabaseClient.from('profiles').select('*').eq('id', session.user.id).single();
+                if (profile) {
+                    currentUser = { ...session.user, profile };
                 } else {
-                    attendanceButtonsContainer.classList.remove('hidden');
-                    attendanceStatusMessage.classList.add('hidden');
+                    await supabaseClient.auth.signOut(); return;
                 }
             }
-
+            body.className = "bg-slate-50 min-h-screen font-sans text-slate-800";
+            userInfo.innerHTML = `
+                <div class="flex items-center gap-4">
+                    <div class="text-right hidden sm:block">
+                        <p class="font-bold text-slate-800">${currentUser.profile.nama_lengkap}</p>
+                        <p class="text-xs text-slate-500 uppercase tracking-wider">${currentUser.profile.role}</p>
+                    </div>
+                    <button id="logout-btn" class="btn btn-red text-sm py-2 px-4">Logout</button>
+                </div>`;
+            document.getElementById('logout-btn').addEventListener('click', async () => { await supabaseClient.auth.signOut(); render(); });
+            currentUser.profile.role === 'admin' ? renderAdminDashboard() : renderSiswaDashboard();
         } else {
-            // User is logged out
+            currentUser = null;
             body.className = "login-wallpaper min-h-screen font-sans flex items-center justify-center p-4";
-            loginPage.style.display = 'block';
-            dashboard.style.display = 'none';
-            userInfo.innerHTML = `<p class="text-gray-600">Silakan login</p>`;
-        }
-    };
-    
-    // --- EVENT HANDLERS ---
-    const handleLogin = (e) => {
-        e.preventDefault();
-        const username = e.target.username.value.toLowerCase();
-        const password = e.target.password.value;
-        const potentialUser = dummyUsers[username];
-
-        if (potentialUser && potentialUser.password === password) {
-            currentUser = { id: username, ...potentialUser };
-            showNotif('Login berhasil!', 'success');
-            loginForm.reset();
-            updateUI();
-        } else {
-            showNotif('Username atau password salah.', 'error');
-        }
-    };
-
-    const handleLogout = () => {
-        currentUser = null;
-        updateUI();
-    };
-    
-    const handleAbsensi = (e) => {
-        const status = e.currentTarget.dataset.status;
-        const tanggalHariIni = new Date().toISOString().slice(0, 10);
-
-        const sudahAbsen = attendanceData.find(item => 
-            item.nama === currentUser.nama && item.tanggal === tanggalHariIni
-        );
-        if (sudahAbsen) {
-            showNotif('Anda sudah melakukan absensi hari ini.', 'info');
-            return;
-        }
-
-        const jamAbsen = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Jakarta' });
-        const fotoFile = fotoInput.files[0];
-
-        const absenBaru = {
-            id: Date.now(),
-            jam: jamAbsen,
-            tanggal: tanggalHariIni,
-            nama: currentUser.nama,
-            kelas: currentUser.kelas,
-            status: status,
-            foto: fotoFile ? URL.createObjectURL(fotoFile) : null
-        };
-        
-        attendanceData = [absenBaru, ...attendanceData];
-        showNotif(`Absensi untuk ${currentUser.nama} sebagai '${status}' berhasil direkam.`, 'success');
-        
-        fotoInput.value = null; // Reset input
-        updateUI(); 
-    };
-    
-    const handleOpenModal = (e) => {
-        if (e.target.classList.contains('edit-btn')) {
-            const id = Number(e.target.dataset.id);
-            const item = attendanceData.find(d => d.id === id);
-            if (item) {
-                editForm.id.value = item.id;
-                editForm.nama.value = item.nama;
-                editForm.kelas.value = item.kelas;
-                editForm.tanggal.value = item.tanggal;
-                editForm.status.value = item.status;
-                editModal.classList.remove('hidden');
+            userInfo.innerHTML = '';
+            appContent.innerHTML = currentPage === 'login' ? loginTemplate : registerTemplate;
+            if (currentPage === 'login') {
+                document.getElementById('login-form').addEventListener('submit', handleLogin);
+                document.getElementById('switch-to-register').addEventListener('click', () => { currentPage = 'register'; render(); });
+            } else {
+                document.getElementById('register-form').addEventListener('submit', handleRegister);
+                document.getElementById('switch-to-login').addEventListener('click', () => { currentPage = 'login'; render(); });
             }
         }
     };
 
-    const handleSaveEdit = (e) => {
-        e.preventDefault();
-        const id = Number(e.target.id.value);
-        const updatedItem = {
-            nama: e.target.nama.value,
-            kelas: e.target.kelas.value,
-            tanggal: e.target.tanggal.value,
-            status: e.target.status.value,
-        };
+    // --- DASHBOARD RENDERERS ---
+    const renderSiswaDashboard = async () => {
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const { data: absensiHariIni } = await supabaseClient.from('absensi').select('status').eq('user_id', currentUser.id).eq('tanggal', todayStr).maybeSingle();
 
-        attendanceData = attendanceData.map(item => 
-            item.id === id ? { ...item, ...updatedItem } : item
-        );
-        
-        showNotif('Data absensi berhasil diperbarui.', 'success');
-        editModal.classList.add('hidden');
-        updateUI();
-    };
+        appContent.innerHTML = `
+            <div class="max-w-4xl mx-auto space-y-8">
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div>
+                        <h2 class="text-3xl font-bold text-slate-800 mb-2">Selamat Datang, ${currentUser.profile.nama_lengkap.split(' ')[0]}! 👋</h2>
+                        <p class="text-slate-500">Jangan lupa isi absensi hari ini ya.</p>
+                    </div>
+                    <div class="bg-blue-50 px-6 py-3 rounded-xl border border-blue-100">
+                        <p class="text-sm text-blue-600 font-medium">Kelas Anda</p>
+                        <p class="text-2xl font-bold text-blue-800">${currentUser.profile.kelas}</p>
+                    </div>
+                </div>
 
-    const handleExport = () => {
-        let csvContent = "data:text/csv;charset=utf-8,username,nama,kelas,role,password\n";
-        
-        for (const username in dummyUsers) {
-            if (dummyUsers[username].role === 'siswa') {
-                const user = dummyUsers[username];
-                const row = [username, user.nama, user.kelas, user.role, user.password].join(",");
-                csvContent += row + "\n";
-            }
-        }
-
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "data_siswa.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        showNotif("Data siswa berhasil di-export!", 'info');
-    };
-
-    const handleImport = (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const text = e.target.result;
-            const rows = text.split('\n').slice(1);
-            
-            let importedCount = 0;
-            rows.forEach(row => {
-                const columns = row.trim().split(',');
-                if (columns.length === 5) {
-                    const [username, nama, kelas, role, password] = columns;
-                    if ((role === 'siswa' || role === 'guru') && username) {
-                        dummyUsers[username.toLowerCase().trim()] = { password, role, nama, kelas };
-                        importedCount++;
+                <div class="card text-center py-10">
+                    <h3 class="text-xl font-bold mb-6 text-slate-800">Status Kehadiran Hari Ini</h3>
+                    ${absensiHariIni ? 
+                        `<div class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-emerald-100 text-emerald-800 font-bold text-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                            Anda tercatat '${absensiHariIni.status}'
+                        </div>` : 
+                        `<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
+                            ${['Hadir', 'Izin', 'Sakit'].map(status => `
+                                <button data-status="${status}" class="absen-btn group p-6 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-3
+                                    ${status === 'Hadir' ? 'bg-emerald-50 border-emerald-200 hover:border-emerald-500 text-emerald-700' : 
+                                      status === 'Izin' ? 'bg-amber-50 border-amber-200 hover:border-amber-500 text-amber-700' : 
+                                      'bg-rose-50 border-rose-200 hover:border-rose-500 text-rose-700'}">
+                                    <span class="text-3xl">${status === 'Hadir' ? '👋' : status === 'Izin' ? '📝' : '🤒'}</span>
+                                    <span class="font-bold text-lg">${status}</span>
+                                </button>
+                            `).join('')}
+                        </div>
+                        <div class="mt-8 pt-6 border-t border-slate-100 max-w-md mx-auto">
+                            <label class="block text-sm font-medium text-slate-600 mb-2">Unggah Foto Bukti (Opsional)</label>
+                            <input id="foto-input" type="file" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer bg-slate-50 rounded-full border border-slate-200"/>
+                        </div>`
                     }
-                }
-            });
-            showNotif(`${importedCount} data siswa berhasil di-import. Silakan login ulang untuk melihat perubahan.`, 'success');
-        };
-        reader.readAsText(file);
-        importFileInput.value = '';
+                </div>
+            </div>`;
+        if (!absensiHariIni) document.querySelectorAll('.absen-btn').forEach(btn => btn.addEventListener('click', handleAbsensi));
     };
 
+    const renderAdminDashboard = async () => {
+        const { data: absensi } = await supabaseClient.from('absensi').select('*').order('created_at', { ascending: false });
+        appContent.innerHTML = `
+            <div class="max-w-6xl mx-auto space-y-8">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-3xl font-bold text-slate-800">Dashboard Admin</h2>
+                    <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg font-medium">Total Data: ${absensi?.length || 0}</div>
+                </div>
+                <div class="card overflow-hidden p-0">
+                    <div class="overflow-x-auto">
+                       <table class="min-w-full divide-y divide-slate-200">
+                           <thead class="bg-slate-50">
+                               <tr>
+                                   ${['Waktu', 'Tanggal', 'Nama Siswa', 'Kelas', 'Status', 'Bukti', 'Aksi'].map(h => 
+                                       `<th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">${h}</th>`
+                                   ).join('')}
+                               </tr>
+                           </thead>
+                           <tbody class="bg-white divide-y divide-slate-100">
+                               ${absensi?.length ? absensi.map(item => `
+                                   <tr class="hover:bg-slate-50 transition-colors">
+                                       <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">${item.jam?.slice(0,5) || '-'}</td>
+                                       <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">${new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
+                                       <td class="px-6 py-4 whitespace-nowrap font-medium text-slate-900">${item.nama}</td>
+                                       <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600"><span class="px-2 py-1 bg-slate-100 rounded-md">${item.kelas}</span></td>
+                                       <td class="px-6 py-4 whitespace-nowrap"><span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                        ${item.status === 'Hadir' ? 'bg-emerald-100 text-emerald-800' : item.status === 'Izin' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'}">
+                                        ${item.status}</span></td>
+                                       <td class="px-6 py-4 whitespace-nowrap text-sm">${item.foto_url ? `<a href="${item.foto_url}" target="_blank" class="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg> Lihat</a>` : '<span class="text-slate-400">-</span>'}</td>
+                                       <td class="px-6 py-4 whitespace-nowrap text-sm"><button data-id="${item.id}" class="edit-btn text-amber-600 hover:text-amber-900 font-medium">Edit</button></td>
+                                   </tr>`).join('') : '<tr><td colspan="7" class="px-6 py-12 text-center text-slate-500 italic">Belum ada data absensi yang masuk.</td></tr>'}
+                           </tbody>
+                       </table>
+                   </div>
+                </div>
+            </div>`;
+        appContent.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', handleOpenModal));
+    };
 
-    // --- EVENT LISTENERS INITIALIZATION ---
-    loginForm.addEventListener('submit', handleLogin);
-    absenButtons.forEach(btn => btn.addEventListener('click', handleAbsensi));
-    adminTableBody.addEventListener('click', handleOpenModal);
-    cancelEditBtn.addEventListener('click', () => editModal.classList.add('hidden'));
-    editForm.addEventListener('submit', handleSaveEdit);
-    exportBtn.addEventListener('click', handleExport);
-    importBtn.addEventListener('click', () => importFileInput.click());
-    importFileInput.addEventListener('change', handleImport);
+    // --- ACTION HANDLERS ---
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        const { username, password } = Object.fromEntries(new FormData(e.target));
+        // 1. Cari email dari username
+        const { data, error } = await supabaseClient.from('profiles').select('email').eq('username', username).single();
+        if (error || !data) return showNotif('Username tidak ditemukan.', 'error');
+        // 2. Login dengan email yang ditemukan
+        const { error: signInError } = await supabaseClient.auth.signInWithPassword({ email: data.email, password });
+        if (signInError) return showNotif('Password salah.', 'error');
+        showNotif('Login berhasil! Mengalihkan...', 'success');
+        render();
+    };
 
-    // --- INITIAL RENDER ---
-    updateUI();
+    const handleRegister = async (e) => {
+        e.preventDefault();
+        const formData = Object.fromEntries(new FormData(e.target));
+        if (formData.password.length < 8) return showNotif('Password minimal 8 karakter.', 'error');
+
+        // Cek username unik
+        const { data: existing } = await supabaseClient.from('profiles').select('username').eq('username', formData.username).maybeSingle();
+        if (existing) return showNotif('Username sudah dipakai.', 'error');
+
+        const role = formData.username.toLowerCase().includes('admin') ? 'admin' : 'siswa';
+        const { data: authData, error: signUpError } = await supabaseClient.auth.signUp({ email: formData.email, password: formData.password });
+        if (signUpError) return showNotif(signUpError.message, 'error');
+
+        if (authData.user) {
+            const { error: profileError } = await supabaseClient.from('profiles').insert({
+                id: authData.user.id,
+                username: formData.username,
+                email: formData.email,
+                nama_lengkap: formData.nama_lengkap,
+                kelas: role === 'siswa' ? formData.kelas : null,
+                role: role
+            });
+            if (profileError) return showNotif(profileError.message, 'error');
+        }
+        showNotif('Registrasi berhasil! Silakan login.', 'success');
+        currentPage = 'login';
+        render();
+    };
+
+    const handleAbsensi = async (e) => {
+        const status = e.currentTarget.dataset.status;
+        const fotoFile = document.getElementById('foto-input').files[0];
+        let foto_url = null;
+
+        if (fotoFile) {
+            const fileName = `${currentUser.id}/${Date.now()}.jpg`;
+            const { error: uploadError } = await supabaseClient.storage.from('bukti_absensi').upload(fileName, fotoFile);
+            if (uploadError) return showNotif('Gagal upload foto: ' + uploadError.message, 'error');
+            const { data } = supabaseClient.storage.from('bukti_absensi').getPublicUrl(fileName);
+            foto_url = data.publicUrl;
+        }
+
+        const { error } = await supabaseClient.from('absensi').insert({
+            user_id: currentUser.id,
+            nama: currentUser.profile.nama_lengkap,
+            kelas: currentUser.profile.kelas,
+            tanggal: new Date().toISOString().slice(0, 10),
+            jam: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+            status, foto_url
+        });
+
+        if (error) return showNotif(error.message, 'error');
+        showNotif(`Absensi '${status}' berhasil!`, 'success');
+        render();
+    };
+
+    const handleOpenModal = async (e) => {
+        const { data } = await supabaseClient.from('absensi').select('*').eq('id', e.target.dataset.id).single();
+        if (data) {
+            ['id', 'nama', 'kelas', 'status'].forEach(field => editForm[field].value = data[field]);
+            editModal.classList.remove('hidden');
+        }
+    };
+
+    document.getElementById('cancel-edit-btn').onclick = () => editModal.classList.add('hidden');
+    editForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const { id, nama, kelas, status } = Object.fromEntries(new FormData(e.target));
+        const { error } = await supabaseClient.from('absensi').update({ nama, kelas, status }).eq('id', id);
+        if (!error) { showNotif('Data diperbarui.', 'success'); editModal.classList.add('hidden'); render(); }
+    };
+
+    render(); // Initial Render
 });
 </script>
-
 </body>
 </html>
-
