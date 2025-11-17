@@ -357,12 +357,14 @@ document.addEventListener('DOMContentLoaded', () => {
             foto_url = data.publicUrl;
         }
 
+        // PERBAIKAN: Hapus 'jam' dari objek insert.
+        // Database akan mengisinya otomatis dengan 'CURRENT_TIME'.
         const { error } = await supabaseClient.from('absensi').insert({
             user_id: currentUser.id,
             nama: currentUser.profile.nama_lengkap,
             kelas: currentUser.profile.kelas,
             tanggal: new Date().toISOString().slice(0, 10),
-            jam: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+            // jam: ... (DIHAPUS)
             status, foto_url
         });
 
